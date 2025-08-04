@@ -1,5 +1,5 @@
 const express = require('express');
-const { body, query, validationResult } = require('express-validator');
+const { body, query, param, validationResult } = require('express-validator');
 const { Signal } = require('../models');
 const { authenticate } = require('../middleware');
 
@@ -48,6 +48,12 @@ const getSignalsValidation = [
     .optional()
     .isIn(['timestamp', '-timestamp', 'signal_type', '-signal_type'])
     .withMessage('Sort must be one of: timestamp, -timestamp, signal_type, -signal_type')
+];
+
+const idValidation = [
+  param('id')
+    .isMongoId()
+    .withMessage('Invalid signal ID format')
 ];
 
 router.post('/', authenticate, createSignalValidation, async (req, res) => {
@@ -149,8 +155,16 @@ router.get('/', authenticate, getSignalsValidation, async (req, res) => {
   }
 });
 
-router.get('/:id', authenticate, async (req, res) => {
+router.get('/:id', authenticate, idValidation, async (req, res) => {
   try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Validation failed',
+        errors: errors.array()
+      });
+    }
     const signal = await Signal.findOne({
       _id: req.params.id,
       user_id: req.user._id
@@ -180,8 +194,16 @@ router.get('/:id', authenticate, async (req, res) => {
 });
 
 
-router.delete('/:id', authenticate, async (req, res) => {
+router.delete('/:id', authenticate, idValidation, async (req, res) => {
   try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Validation failed',
+        errors: errors.array()
+      });
+    }
     const signal = await Signal.findOneAndDelete({
       _id: req.params.id,
       user_id: req.user._id
