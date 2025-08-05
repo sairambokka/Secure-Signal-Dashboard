@@ -10,6 +10,8 @@ app.use(express.json());
 app.use('/auth', authRouter);
 app.use('/signals', signalsRouter);
 
+
+//Basic integration tests to test the user flow inside the app from login/signup to adding a signal.
 describe('Integration Tests - Full API Workflows', () => {
   beforeAll(async () => {
     await connectToDatabase();

@@ -8,6 +8,8 @@ const app = express();
 app.use(express.json());
 app.use('/auth', authRouter);
 
+
+//Basic tests to test the authentication flow and validations.
 describe('Authentication Endpoints', () => {
   beforeAll(async () => {
     await connectToDatabase();

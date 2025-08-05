@@ -5,6 +5,7 @@ const { generateToken } = require('../utils/jwt');
 
 const router = express.Router();
 
+//Basic validation to avoid admin/admin stuff
 const signupValidation = [
   body('username')
     .isLength({ min: 3, max: 50 })
@@ -89,6 +90,7 @@ router.post('/login', loginValidation, async (req, res) => {
       });
     }
 
+    //Having same error message for both email and password is a security measure
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });

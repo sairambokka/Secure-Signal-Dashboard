@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 
+//Signal Schema for MongoDB
 const signalSchema = new mongoose.Schema({
   user_id: {
     type: String,

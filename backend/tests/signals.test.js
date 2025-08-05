@@ -10,6 +10,7 @@ app.use(express.json());
 app.use('/auth', authRouter);
 app.use('/signals', signalsRouter);
 
+//Basic tests to test the signal endpoints
 describe('Signals Endpoints', () => {
   let userToken;
   let userId;

@@ -5,6 +5,7 @@ const { authenticate } = require('../middleware');
 
 const router = express.Router();
 
+//Basic validation to avoid user error
 const createSignalValidation = [
   body('agent_id')
     .notEmpty()
