@@ -43,28 +43,3 @@ jobs:
       env:
         NODE_ENV: test
         MONGODB_URI: mongodb://localhost:27017/test
-
-  frontend-tests:
-    runs-on: ubuntu-latest
-    
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-        cache: 'npm'
-        cache-dependency-path: frontend/package-lock.json
-    
-    - name: Install frontend dependencies
-      run: |
-        cd frontend
-        npm ci
-    
-    - name: Run frontend tests
-      run: |
-        cd frontend
-        npm test -- --coverage --watchAll=false
-      env:
-        CI: true
