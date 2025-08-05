@@ -16,6 +16,7 @@ const SignalList: React.FC<SignalListProps> = ({ refreshTrigger }) => {
   });
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
 
   const signalTypes = [
     { value: '', label: 'All Types' },
@@ -64,6 +65,18 @@ const SignalList: React.FC<SignalListProps> = ({ refreshTrigger }) => {
     const { name, value } = e.target;
     setFilters(prev => ({ ...prev, [name]: value }));
     setCurrentPage(1);
+  };
+
+  const toggleCardExpansion = (signalId: string) => {
+    setExpandedCards(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(signalId)) {
+        newSet.delete(signalId);
+      } else {
+        newSet.add(signalId);
+      }
+      return newSet;
+    });
   };
 
 
@@ -148,18 +161,30 @@ const SignalList: React.FC<SignalListProps> = ({ refreshTrigger }) => {
           <div className="signals-grid">
             {signals.map(signal => {
               const typeInfo = getSignalTypeInfo(signal.signal_type);
+              const isExpanded = expandedCards.has(signal._id);
               return (
                 <div key={signal._id} className="signal-card">
                   <div className="signal-header">
-                    <span 
-                      className="signal-badge"
-                      style={{ backgroundColor: typeInfo.color }}
+                    <div className="signal-header-left">
+                      <span 
+                        className="signal-badge"
+                        style={{ backgroundColor: typeInfo.color }}
+                      >
+                        {typeInfo.label}
+                      </span>
+                      <span className="agent-badge">
+                        {signal.agent_id}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => toggleCardExpansion(signal._id)}
+                      className="expand-button"
+                      aria-label={isExpanded ? "Collapse details" : "Expand details"}
                     >
-                      {typeInfo.label}
-                    </span>
-                    <span className="agent-badge">
-                      {signal.agent_id}
-                    </span>
+                      <span className={`expand-arrow ${isExpanded ? 'expanded' : ''}`}>
+                        ▼
+                      </span>
+                    </button>
                   </div>
                   
                   <div className="signal-content">
@@ -177,22 +202,91 @@ const SignalList: React.FC<SignalListProps> = ({ refreshTrigger }) => {
                       </div>
                     </div>
                     
-                    {signal.context && (Object.keys(signal.context).length > 0) && (
-                      <div className="signal-context">
-                        <strong>Context:</strong>
-                        {signal.context.activity && (
-                          <span className="context-item">Activity: {signal.context.activity}</span>
-                        )}
-                        {signal.context.environment && (
-                          <span className="context-item">Environment: {signal.context.environment}</span>
-                        )}
-                      </div>
-                    )}
-                    
                     <div className="signal-timestamp">
                       {formatDate(signal.timestamp)}
                     </div>
                   </div>
+
+                  {isExpanded && (
+                    <div className="signal-details">
+                      <div className="details-section">
+                        <h4>Complete Signal Details</h4>
+                        
+                        <div className="detail-item">
+                          <strong>Signal ID:</strong> {signal._id}
+                        </div>
+                        
+                        <div className="detail-item">
+                          <strong>User ID:</strong> {signal.user_id}
+                        </div>
+                        
+                        <div className="detail-item">
+                          <strong>Agent ID:</strong> {signal.agent_id}
+                        </div>
+                        
+                        <div className="detail-item">
+                          <strong>Signal Type:</strong> {signal.signal_type}
+                        </div>
+                        
+                        <div className="detail-item">
+                          <strong>Timestamp:</strong> {signal.timestamp}
+                        </div>
+                        
+                        <div className="detail-item">
+                          <strong>Created At:</strong> {formatDate(signal.createdAt)}
+                        </div>
+                        
+                        <div className="detail-item">
+                          <strong>Updated At:</strong> {formatDate(signal.updatedAt)}
+                        </div>
+                      </div>
+
+                      <div className="details-section">
+                        <h4>Payload Details</h4>
+                        
+                        <div className="detail-item">
+                          <strong>Average Value:</strong> {signal.payload.avg}
+                        </div>
+                        
+                        {signal.payload.sdnn && (
+                          <div className="detail-item">
+                            <strong>SDNN:</strong> {signal.payload.sdnn}
+                          </div>
+                        )}
+                        
+                        <div className="detail-item">
+                          <strong>Raw Data Points:</strong> {signal.payload.raw.length}
+                        </div>
+                        
+                        <div className="detail-item">
+                          <strong>Raw Values:</strong>
+                          <div className="raw-data-container">
+                            <pre className="raw-data">
+                              {JSON.stringify(signal.payload.raw, null, 2)}
+                            </pre>
+                          </div>
+                        </div>
+                      </div>
+
+                      {signal.context && Object.keys(signal.context).length > 0 && (
+                        <div className="details-section">
+                          <h4>Context Information</h4>
+                          
+                          {signal.context.activity && (
+                            <div className="detail-item">
+                              <strong>Activity:</strong> {signal.context.activity}
+                            </div>
+                          )}
+                          
+                          {signal.context.environment && (
+                            <div className="detail-item">
+                              <strong>Environment:</strong> {signal.context.environment}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
                   
                   <div className="signal-actions">
                     <button
